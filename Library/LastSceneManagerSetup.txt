@@ -1,4 +1,10 @@
 sceneSetups:
-- path: Assets/SandBox.unity
+- path: Assets/Levels/Main menu.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Levels/Level_01.unity
   isLoaded: 1
   isActive: 1
+- path: Assets/Levels/Level_02.unity
+  isLoaded: 0
+  isActive: 0

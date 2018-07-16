@@ -8,6 +8,7 @@ public class Player : MonoBehaviour {
     [SerializeField] float runSpeed = 5f;
     [SerializeField] float jumpSpeed = 5f;
     [SerializeField] float climbSpeed = 5f;
+    [SerializeField] Vector2 deathKick = new Vector2 (25f, 25f);
 
     //State
     bool isAlive = true;
@@ -15,7 +16,8 @@ public class Player : MonoBehaviour {
     //Cached components references
     Rigidbody2D myrigidBody;
     Animator myAnimator;
-    Collider2D myCollider2D;
+    CapsuleCollider2D myBodyCollider;
+    BoxCollider2D myFeetCollider;
     float gravityScaleAtStart;
 
     //Messages then methods
@@ -23,16 +25,19 @@ public class Player : MonoBehaviour {
 	void Start () {
         myrigidBody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
-        myCollider2D = GetComponent<Collider2D>();
+        myBodyCollider = GetComponent<CapsuleCollider2D>();
+        myFeetCollider = GetComponent<BoxCollider2D>();
         gravityScaleAtStart = myrigidBody.gravityScale;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        if (!isAlive) { return; }
         Run();
         Jump();
         FlipSprite();
         ClimbLadder();
+        Die();
 	}
 
     private void Run()
@@ -47,7 +52,7 @@ public class Player : MonoBehaviour {
 
     private void Jump()
     {
-        if (!myCollider2D.IsTouchingLayers(LayerMask.GetMask("Ground"))) { return; }
+        if (!myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Ground", "Climbing"))) { return; }
         
         if (CrossPlatformInputManager.GetButtonDown("Jump"))
         {
@@ -56,9 +61,20 @@ public class Player : MonoBehaviour {
         }
     }
 
+    private void Die()
+    {
+        if (myBodyCollider.IsTouchingLayers(LayerMask.GetMask("Enemies", "Hazards")))
+        {
+            myAnimator.SetTrigger("Die");
+            deathKick = new Vector2(Mathf.Sign(myrigidBody.velocity.x) * Random.Range(50f, 110f), Random.Range(50f, 110f));
+            GetComponent<Rigidbody2D>().velocity = deathKick;
+            isAlive = false;
+        }
+    }
+
     private void ClimbLadder()
     {
-        if (!myCollider2D.IsTouchingLayers(LayerMask.GetMask("Climbing")))
+        if (!myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Climbing")))
         {
             myAnimator.SetBool("Climbing", false);
             myrigidBody.gravityScale = gravityScaleAtStart;

@@ -68,6 +68,7 @@ public class Player : MonoBehaviour {
             myAnimator.SetTrigger("Die");
             deathKick = new Vector2(Mathf.Sign(myrigidBody.velocity.x) * Random.Range(50f, 110f), Random.Range(50f, 110f));
             GetComponent<Rigidbody2D>().velocity = deathKick;
+            FindObjectOfType<GameSession>().ProcessPlayerDeath();
             isAlive = false;
         }
     }
